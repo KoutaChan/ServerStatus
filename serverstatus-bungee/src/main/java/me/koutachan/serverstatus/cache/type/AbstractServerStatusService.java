@@ -48,8 +48,4 @@ public abstract class AbstractServerStatusService implements ServerStatusService
         });
         return future;
     }
-
-    public void startTimer(Plugin plugin) {
-        plugin.getProxy().getScheduler().schedule(plugin, this::updateCache, 0, ServerStatusBungee.INSTANCE.configuration.getInt("updateInterval", 30), TimeUnit.SECONDS);
-    }
 }
