@@ -1,0 +1,18 @@
+# サーバーステータス表示の設定
+
+# オンラインプレイヤー数と最大プレイヤー数の両方を表示する形式
+# %players% - 現在のオンラインプレイヤー数
+# %max-players% - サーバーの最大プレイヤー数
+# %server-name% - サーバー名
+player-count-with-max: "&a%players%/%max-players%"
+
+# サーバーがオフラインの場合の表示形式
+# %server-name% - サーバー名
+server-offline: "&cサーバーはオフラインです"
+
+# 不明なサーバーのときのエラー文
+# %server-name% - サーバー名
+unknown-server: "&c情報を取得できませんでした"
+
+# 更新時間 (tick)
+update-tick: 600

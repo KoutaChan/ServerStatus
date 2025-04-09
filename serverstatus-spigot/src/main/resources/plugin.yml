@@ -1,0 +1,10 @@
+name: ServerStatus
+version: '1.0-SNAPSHOT'
+main: me.koutachan.serverstatus.ServerStatusSpigot
+api-version: '1.13'
+
+depend:
+  - Citizens
+commands:
+  set-status:
+    permission: serverstatus.set-status
