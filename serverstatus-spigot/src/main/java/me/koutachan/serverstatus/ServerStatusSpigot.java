@@ -91,7 +91,6 @@ public final class ServerStatusSpigot extends JavaPlugin {
             return;
         }
 
-        trait.destroy();
         npc.removeTrait(ServerStatusTrait.class);
         player.sendMessage(ChatColor.GREEN + "削除しました");
     }

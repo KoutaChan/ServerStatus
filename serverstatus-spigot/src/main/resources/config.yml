@@ -16,3 +16,5 @@ unknown-server: "&c情報を取得できませんでした"
 
 # 更新時間 (tick)
 update-tick: 600
+
+display-height: 0.3
