@@ -1,7 +1,5 @@
 package me.koutachan.serverstatus;
 
-import com.google.common.io.ByteArrayDataOutput;
-import com.google.common.io.ByteStreams;
 import me.koutachan.serverstatus.cache.ServerStatusInfo;
 import me.koutachan.serverstatus.channel.MessageListener;
 import me.koutachan.serverstatus.citizens.ServerStatusTrait;
@@ -11,7 +9,6 @@ import me.koutachan.serverstatus.task.StatusUpdateTask;
 import net.citizensnpcs.api.CitizensAPI;
 import net.citizensnpcs.api.npc.NPC;
 import net.citizensnpcs.api.trait.TraitInfo;
-import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;

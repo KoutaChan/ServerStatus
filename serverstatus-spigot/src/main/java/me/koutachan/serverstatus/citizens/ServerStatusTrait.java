@@ -185,7 +185,7 @@ public class ServerStatusTrait extends Trait {
                 hologramLines.removeIf(line -> getRendererFromLine(line) == renderer);
             }
 
-            Method reloadMethod = HologramTrait.class.getDeclaredMethod("reloadLineHologr                                           ams");
+            Method reloadMethod = HologramTrait.class.getDeclaredMethod("reloadLineHolograms");
             reloadMethod.setAccessible(true);
             reloadMethod.invoke(trait);
 
