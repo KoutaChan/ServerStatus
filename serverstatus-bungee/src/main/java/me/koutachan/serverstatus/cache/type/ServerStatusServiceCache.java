@@ -18,21 +18,6 @@ public class ServerStatusServiceCache extends AbstractServerStatusService {
     private final Map<String, ServerStatusInfo> cache = new ConcurrentHashMap<>();
 
     /**
-     * すべてのサーバーキャッシュを更新します
-     *
-     * @return 更新処理の完了を表す CompletableFuture
-     */
-    public CompletableFuture<Void> updateCache() {
-        Map<String, ServerInfo> servers = ServerStatusBungee.INSTANCE.getProxy().getServers();
-
-        CompletableFuture<?>[] futures = servers.values().stream()
-                .map(this::ping)
-                .toArray(CompletableFuture[]::new);
-
-        return CompletableFuture.allOf(futures);
-    }
-
-    /**
      * 個別のサーバーに ping を送信しキャッシュを更新します
      *
      * @param server ping を送信するサーバー
