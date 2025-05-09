@@ -56,7 +56,7 @@ public final class ServerStatusBungee extends Plugin {
             }
             case CACHE: {
                 getLogger().info("定期更新モードでステータスサービスを初期化しました");
-                channelHandler.initializeCacheService(Duration.ofSeconds(configuration.getInt("updateInterval")));
+                channelHandler.initializeCacheService(Duration.ofSeconds(configuration.getInt("updateInterval", 5)));
                 break;
             }
         }
