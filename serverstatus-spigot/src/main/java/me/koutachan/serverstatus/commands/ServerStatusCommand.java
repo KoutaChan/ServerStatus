@@ -1,7 +1,7 @@
 package me.koutachan.serverstatus.commands;
 
 import me.koutachan.serverstatus.ServerStatusSpigot;
-import me.koutachan.serverstatus.cache.ServerStatusInfo;
+import me.koutachan.serverstatus.ServerStatusInfo;
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;

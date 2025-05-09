@@ -1,4 +1,4 @@
-package me.koutachan.serverstatus.cache;
+package me.koutachan.serverstatus;
 
 import com.google.common.io.ByteArrayDataInput;
 import com.google.common.io.ByteArrayDataOutput;

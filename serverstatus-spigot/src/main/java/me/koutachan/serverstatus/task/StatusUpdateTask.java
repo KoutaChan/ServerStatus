@@ -3,7 +3,7 @@ package me.koutachan.serverstatus.task;
 import com.google.common.io.ByteArrayDataOutput;
 import com.google.common.io.ByteStreams;
 import me.koutachan.serverstatus.ServerStatusSpigot;
-import me.koutachan.serverstatus.cache.proxy.ProxyAdapter;
+import me.koutachan.serverstatus.proxy.ProxyAdapter;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitRunnable;

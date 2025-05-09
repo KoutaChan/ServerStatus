@@ -1,11 +1,8 @@
 package me.koutachan.serverstatus.event;
 
-import com.google.common.io.ByteArrayDataInput;
-import com.google.common.io.ByteStreams;
 import me.koutachan.serverstatus.BungeeCordUtils;
 import me.koutachan.serverstatus.ServerStatusBungee;
-import me.koutachan.serverstatus.cache.proxy.ProxyAdapter;
-import net.md_5.bungee.api.connection.Server;
+import me.koutachan.serverstatus.proxy.ProxyAdapter;
 import net.md_5.bungee.api.event.PluginMessageEvent;
 import net.md_5.bungee.api.plugin.Listener;
 import net.md_5.bungee.event.EventHandler;

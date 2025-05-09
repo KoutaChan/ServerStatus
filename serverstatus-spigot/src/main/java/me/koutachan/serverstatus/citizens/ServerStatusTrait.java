@@ -1,7 +1,7 @@
 package me.koutachan.serverstatus.citizens;
 
 import me.koutachan.serverstatus.ServerStatusSpigot;
-import me.koutachan.serverstatus.cache.ServerStatusInfo;
+import me.koutachan.serverstatus.ServerStatusInfo;
 import net.citizensnpcs.api.trait.Trait;
 import net.citizensnpcs.api.trait.TraitName;
 import net.citizensnpcs.api.util.DataKey;

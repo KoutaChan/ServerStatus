@@ -12,9 +12,9 @@ import com.velocitypowered.api.proxy.ServerConnection;
 import com.velocitypowered.api.proxy.messages.MinecraftChannelIdentifier;
 import com.velocitypowered.api.proxy.server.RegisteredServer;
 import me.koutachan.serverstatus.adapter.VelocityAdapter;
-import me.koutachan.serverstatus.cache.proxy.ProxyAdapter;
-import me.koutachan.serverstatus.cache.proxy.ProxyChannelHandler;
-import me.koutachan.serverstatus.cache.proxy.ServiceMode;
+import me.koutachan.serverstatus.proxy.ProxyAdapter;
+import me.koutachan.serverstatus.proxy.ProxyChannelHandler;
+import me.koutachan.serverstatus.proxy.ServiceMode;
 import org.slf4j.Logger;
 import org.spongepowered.configurate.CommentedConfigurationNode;
 import org.spongepowered.configurate.ConfigurateException;
@@ -48,7 +48,8 @@ public class ServerStatusVelocity {
         this.channelHandler = new ProxyChannelHandler<>(new VelocityAdapter(proxy));
         Path configPath = dataDirectory.resolve("config.yml");
         if (!configPath.toFile().exists()) {
-            try (InputStream inputStream = ServerStatusVelocity.class.getResourceAsStream("config.yml")) {
+            dataDirectory.toFile().mkdirs();
+            try (InputStream inputStream = ServerStatusVelocity.class.getResourceAsStream("/config.yml")) {
                 assert inputStream != null;
                 Files.copy(inputStream, configPath, StandardCopyOption.REPLACE_EXISTING);
             } catch (IOException e) {
@@ -64,6 +65,11 @@ public class ServerStatusVelocity {
         } catch (ConfigurateException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    @Subscribe
+    public void onProxyInitialization(ProxyInitializeEvent event) {
+        proxy.getChannelRegistrar().register(IDENTIFIER);
 
         initializeStatusService();
     }
@@ -82,11 +88,6 @@ public class ServerStatusVelocity {
                 break;
             }
         }
-    }
-
-    @Subscribe
-    public void onProxyInitialization(ProxyInitializeEvent event) {
-        proxy.getChannelRegistrar().register(IDENTIFIER);
     }
 
     @Subscribe

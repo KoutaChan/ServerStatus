@@ -4,8 +4,8 @@ import com.velocitypowered.api.proxy.ProxyServer;
 import com.velocitypowered.api.proxy.server.RegisteredServer;
 import com.velocitypowered.api.proxy.server.ServerPing;
 import me.koutachan.serverstatus.ServerStatusVelocity;
-import me.koutachan.serverstatus.cache.ServerStatusInfo;
-import me.koutachan.serverstatus.cache.proxy.ProxyAdapter;
+import me.koutachan.serverstatus.ServerStatusInfo;
+import me.koutachan.serverstatus.proxy.ProxyAdapter;
 
 import java.time.Duration;
 import java.util.Collection;

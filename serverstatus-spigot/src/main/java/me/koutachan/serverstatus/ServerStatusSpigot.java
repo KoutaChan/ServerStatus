@@ -1,7 +1,6 @@
 package me.koutachan.serverstatus;
 
-import me.koutachan.serverstatus.cache.ServerStatusInfo;
-import me.koutachan.serverstatus.cache.proxy.ProxyAdapter;
+import me.koutachan.serverstatus.proxy.ProxyAdapter;
 import me.koutachan.serverstatus.channel.MessageListener;
 import me.koutachan.serverstatus.citizens.ServerStatusTrait;
 import me.koutachan.serverstatus.commands.ServerStatusCommand;

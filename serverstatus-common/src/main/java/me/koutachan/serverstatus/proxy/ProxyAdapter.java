@@ -1,6 +1,6 @@
-package me.koutachan.serverstatus.cache.proxy;
+package me.koutachan.serverstatus.proxy;
 
-import me.koutachan.serverstatus.cache.ServerStatusInfo;
+import me.koutachan.serverstatus.ServerStatusInfo;
 
 import java.time.Duration;
 import java.util.Collection;

@@ -3,7 +3,7 @@ package me.koutachan.serverstatus.channel;
 import com.google.common.io.ByteArrayDataInput;
 import com.google.common.io.ByteStreams;
 import me.koutachan.serverstatus.ServerStatusSpigot;
-import me.koutachan.serverstatus.cache.ServerStatusInfo;
+import me.koutachan.serverstatus.ServerStatusInfo;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.messaging.PluginMessageListener;
 

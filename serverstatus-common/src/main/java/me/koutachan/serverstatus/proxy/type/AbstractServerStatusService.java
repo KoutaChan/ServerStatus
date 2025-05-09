@@ -1,8 +1,8 @@
-package me.koutachan.serverstatus.cache.proxy.type;
+package me.koutachan.serverstatus.proxy.type;
 
-import me.koutachan.serverstatus.cache.ServerStatusInfo;
-import me.koutachan.serverstatus.cache.proxy.ProxyAdapter;
-import me.koutachan.serverstatus.cache.proxy.ServerStatusService;
+import me.koutachan.serverstatus.ServerStatusInfo;
+import me.koutachan.serverstatus.proxy.ProxyAdapter;
+import me.koutachan.serverstatus.proxy.ServerStatusService;
 
 import java.util.concurrent.CompletableFuture;
 

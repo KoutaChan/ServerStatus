@@ -1,4 +1,4 @@
-package me.koutachan.serverstatus.cache.proxy;
+package me.koutachan.serverstatus.proxy;
 
 public enum ServiceMode {
     REALTIME,
@@ -7,6 +7,6 @@ public enum ServiceMode {
     private final static ServiceMode[] VALUES = values();
 
     public static ServiceMode ordinalOr(int ordinal, ServiceMode def) {
-        return ordinal >= VALUES.length ? def : VALUES[ordinal];
+        return ordinal >= VALUES.length || ordinal < 0 ? def : VALUES[ordinal];
     }
 }

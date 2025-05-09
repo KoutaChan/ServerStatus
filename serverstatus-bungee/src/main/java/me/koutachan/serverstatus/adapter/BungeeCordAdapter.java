@@ -1,8 +1,8 @@
 package me.koutachan.serverstatus.adapter;
 
 import me.koutachan.serverstatus.ServerStatusBungee;
-import me.koutachan.serverstatus.cache.ServerStatusInfo;
-import me.koutachan.serverstatus.cache.proxy.ProxyAdapter;
+import me.koutachan.serverstatus.ServerStatusInfo;
+import me.koutachan.serverstatus.proxy.ProxyAdapter;
 import net.md_5.bungee.api.ProxyServer;
 import net.md_5.bungee.api.config.ServerInfo;
 

@@ -1,9 +1,9 @@
-package me.koutachan.serverstatus.cache.proxy;
+package me.koutachan.serverstatus.proxy;
 
 import com.google.common.io.ByteArrayDataInput;
 import com.google.common.io.ByteStreams;
-import me.koutachan.serverstatus.cache.proxy.type.CacheServerStatusService;
-import me.koutachan.serverstatus.cache.proxy.type.RealtimeServerStatusService;
+import me.koutachan.serverstatus.proxy.type.CacheServerStatusService;
+import me.koutachan.serverstatus.proxy.type.RealtimeServerStatusService;
 
 import java.time.Duration;
 

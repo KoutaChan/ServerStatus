@@ -1,9 +1,9 @@
 package me.koutachan.serverstatus;
 
 import me.koutachan.serverstatus.adapter.BungeeCordAdapter;
-import me.koutachan.serverstatus.cache.proxy.ProxyAdapter;
-import me.koutachan.serverstatus.cache.proxy.ProxyChannelHandler;
-import me.koutachan.serverstatus.cache.proxy.ServiceMode;
+import me.koutachan.serverstatus.proxy.ProxyAdapter;
+import me.koutachan.serverstatus.proxy.ProxyChannelHandler;
+import me.koutachan.serverstatus.proxy.ServiceMode;
 import me.koutachan.serverstatus.event.ServerStatusListener;
 import net.md_5.bungee.api.config.ServerInfo;
 import net.md_5.bungee.api.plugin.Plugin;
