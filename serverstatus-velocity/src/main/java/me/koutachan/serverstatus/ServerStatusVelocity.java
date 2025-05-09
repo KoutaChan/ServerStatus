@@ -97,11 +97,10 @@ public class ServerStatusVelocity {
         }
         event.setResult(PluginMessageEvent.ForwardResult.handled());
 
-        if (!(event.getSource() instanceof Player player)) {
+        if (!(event.getSource() instanceof ServerConnection connection)) {
             return;
         }
-        Optional<ServerConnection> connection = player.getCurrentServer();
-        connection.ifPresent(serverConnection -> channelHandler.handleData(serverConnection.getServer(), event.getData()));
+        channelHandler.handleData(connection.getServer(), event.getData());
     }
 
     public ProxyServer getProxy() {

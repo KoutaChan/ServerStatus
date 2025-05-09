@@ -21,7 +21,7 @@ public class ProxyChannelHandler<S> {
         }
         ByteArrayDataInput input = ByteStreams.newDataInput(data);
         if (input.readUTF().equals("Info")) {
-            service.getAsByte(bytes -> sendData(server, data));
+            service.getAsByte(result -> sendData(server, result));
         } else {
             throw new IllegalStateException();
         }
