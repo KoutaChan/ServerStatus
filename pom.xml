@@ -13,5 +13,6 @@
         <module>serverstatus-common</module>
         <module>serverstatus-bungee</module>
         <module>serverstatus-spigot</module>
+        <module>serverstatus-velocity</module>
     </modules>
 </project>
