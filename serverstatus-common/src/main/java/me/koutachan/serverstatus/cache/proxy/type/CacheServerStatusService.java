@@ -1,20 +1,21 @@
-package me.koutachan.serverstatus.cache.type;
+package me.koutachan.serverstatus.cache.proxy.type;
 
 import com.google.common.io.ByteArrayDataOutput;
 import com.google.common.io.ByteStreams;
-import me.koutachan.serverstatus.ServerStatusBungee;
 import me.koutachan.serverstatus.cache.ServerStatusInfo;
-import me.koutachan.serverstatus.cache.ServerStatusService;
-import net.md_5.bungee.api.config.ServerInfo;
-import net.md_5.bungee.api.plugin.Plugin;
+import me.koutachan.serverstatus.cache.proxy.ProxyAdapter;
 
+import java.time.Duration;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 
-public class ServerStatusServiceCache extends AbstractServerStatusService {
+public class CacheServerStatusService<S> extends AbstractServerStatusService<S> {
+    public CacheServerStatusService(ProxyAdapter<S> adapter) {
+        super(adapter);
+    }
+
     private final Map<String, ServerStatusInfo> cache = new ConcurrentHashMap<>();
 
     /**
@@ -24,7 +25,7 @@ public class ServerStatusServiceCache extends AbstractServerStatusService {
      * @return ping 処理の完了を表す CompletableFuture
      */
     @Override
-    protected CompletableFuture<ServerStatusInfo> ping(ServerInfo server) {
+    public CompletableFuture<ServerStatusInfo> ping(S server) {
         CompletableFuture<ServerStatusInfo> future = super.ping(server);
         return future.thenApply(info -> cache.put(info.getServerName(), info));
     }
@@ -54,8 +55,8 @@ public class ServerStatusServiceCache extends AbstractServerStatusService {
         return cache.get(serverName);
     }
 
-    public void startTimer(Plugin plugin) {
-        plugin.getProxy().getScheduler().schedule(plugin, this::updateCache, 0, ServerStatusBungee.INSTANCE.configuration.getInt("updateInterval", 30), TimeUnit.SECONDS);
+    public void startTimer(Duration duration) {
+        adapter.schedule(this::updateCache, duration);
     }
 
     /**
@@ -63,7 +64,7 @@ public class ServerStatusServiceCache extends AbstractServerStatusService {
      *
      * @return すべてのサーバーキャッシュのマップ
      */
-    public Map<String, ServerStatusInfo> getAllServerCache() {
+    public Map<String, ServerStatusInfo> getCache() {
         return cache;
     }
 }

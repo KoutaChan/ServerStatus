@@ -1,10 +1,11 @@
 package me.koutachan.serverstatus;
 
-import me.koutachan.serverstatus.cache.ServerStatusService;
-import me.koutachan.serverstatus.cache.type.ServerStatusServiceCache;
-import me.koutachan.serverstatus.cache.type.ServerStatusServiceImpl;
+import me.koutachan.serverstatus.adapter.BungeeCordAdapter;
+import me.koutachan.serverstatus.cache.proxy.ProxyAdapter;
+import me.koutachan.serverstatus.cache.proxy.ProxyChannelHandler;
+import me.koutachan.serverstatus.cache.proxy.ServiceMode;
 import me.koutachan.serverstatus.event.ServerStatusListener;
-import net.md_5.bungee.api.connection.Server;
+import net.md_5.bungee.api.config.ServerInfo;
 import net.md_5.bungee.api.plugin.Plugin;
 import net.md_5.bungee.config.Configuration;
 import net.md_5.bungee.config.ConfigurationProvider;
@@ -14,16 +15,13 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
+import java.time.Duration;
 import java.util.logging.Level;
 
 public final class ServerStatusBungee extends Plugin {
     public static ServerStatusBungee INSTANCE;
-    public final static String CHANNEL_NAME = "serverstatus:forward";
 
-    private ServerStatusService statusService;
-
-    private static final int REAL_TIME_MODE = 1;
-    private static final int PERIODIC_UPDATE_MODE = 2;
+    private ProxyChannelHandler<ServerInfo> channelHandler;
 
     public Configuration configuration;
 
@@ -38,38 +36,29 @@ public final class ServerStatusBungee extends Plugin {
         makeConfig();
 
         try {
-            configuration = ConfigurationProvider.getProvider(YamlConfiguration.class).load(new File(getDataFolder(), "config.yml"));
+            this.channelHandler = new ProxyChannelHandler<>(new BungeeCordAdapter(getProxy()));
+            this.configuration = ConfigurationProvider.getProvider(YamlConfiguration.class).load(new File(getDataFolder(), "config.yml"));
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
-        getProxy().registerChannel(CHANNEL_NAME);
+        getProxy().registerChannel(ProxyAdapter.DEFAULT_CHANNEL);
         getProxy().getPluginManager().registerListener(this, new ServerStatusListener());
-
         initializeStatusService();
     }
 
     private void initializeStatusService() {
-        int cacheMode = configuration.getInt("cacheMode", REAL_TIME_MODE);
-        try {
-            switch (cacheMode) {
-                case REAL_TIME_MODE:
-                    statusService = new ServerStatusServiceImpl();
-                    getLogger().info("リアルタイムモードでステータスサービスを初期化しました");
-                    break;
-                case PERIODIC_UPDATE_MODE:
-                    ServerStatusServiceCache serviceCache = new ServerStatusServiceCache();
-                    serviceCache.startTimer(this);
-                    statusService = serviceCache;
-                    getLogger().info("定期更新モードでステータスサービスを初期化しました");
-                    break;
-                default:
-                    getLogger().warning("不明なキャッシュモード: " + cacheMode + " - リアルタイムモードにフォールバックします");
-                    statusService = new ServerStatusServiceImpl();
-                    break;
+        ServiceMode mode = ServiceMode.ordinalOr(configuration.getInt("cacheMode") - 1, ServiceMode.REALTIME);
+        switch (mode) {
+            case REALTIME: {
+                getLogger().info("リアルタイムモードでステータスサービスを初期化しました");
+                channelHandler.initializeRealtimeService();
+                break;
             }
-        } catch (Exception e) {
-            getLogger().log(Level.SEVERE, "ステータスサービスの初期化中にエラーが発生しました", e);
-            statusService = new ServerStatusServiceImpl();
+            case CACHE: {
+                getLogger().info("定期更新モードでステータスサービスを初期化しました");
+                channelHandler.initializeCacheService(Duration.ofSeconds(configuration.getInt("updateInterval")));
+                break;
+            }
         }
     }
 
@@ -88,17 +77,13 @@ public final class ServerStatusBungee extends Plugin {
         }
     }
 
-    public void handleInfoRequest(Server server) {
-        statusService.getAsByte(res -> server.sendData(CHANNEL_NAME, res));
-    }
-
-    public ServerStatusService getStatusService() {
-        return statusService;
+    public ProxyChannelHandler<ServerInfo> getChannelHandler() {
+        return channelHandler;
     }
 
     @Override
     public void onDisable() {
         // Plugin shutdown logic
-        getProxy().unregisterChannel(CHANNEL_NAME);
+        getProxy().unregisterChannel(ProxyAdapter.DEFAULT_CHANNEL);
     }
 }

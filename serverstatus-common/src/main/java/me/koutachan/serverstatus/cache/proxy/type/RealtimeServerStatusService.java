@@ -1,18 +1,20 @@
-package me.koutachan.serverstatus.cache.type;
+package me.koutachan.serverstatus.cache.proxy.type;
 
 import com.google.common.io.ByteArrayDataOutput;
 import com.google.common.io.ByteStreams;
-import me.koutachan.serverstatus.ServerStatusBungee;
 import me.koutachan.serverstatus.cache.ServerStatusInfo;
-import net.md_5.bungee.api.config.ServerInfo;
+import me.koutachan.serverstatus.cache.proxy.ProxyAdapter;
 
-import java.util.Map;
+import java.util.Collection;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.function.Consumer;
-import java.util.logging.Level;
 
-public class ServerStatusServiceImpl extends AbstractServerStatusService {
+public class RealtimeServerStatusService<S> extends AbstractServerStatusService<S> {
+    public RealtimeServerStatusService(ProxyAdapter<S> adapter) {
+        super(adapter);
+    }
+
     public CompletableFuture<Void> updateCache() {
         throw new IllegalStateException("Cannot update cache");
     }
@@ -20,9 +22,9 @@ public class ServerStatusServiceImpl extends AbstractServerStatusService {
     @SuppressWarnings("unchecked")
     @Override
     public void getAsByte(Consumer<byte[]> con) {
-        Map<String, ServerInfo> servers = ServerStatusBungee.INSTANCE.getProxy().getServers();
+        Collection<S> servers = adapter.getServers();
 
-        CompletableFuture<ServerStatusInfo>[] futures = servers.values().stream()
+        CompletableFuture<ServerStatusInfo>[] futures = servers.stream()
                 .map(this::ping)
                 .toArray(CompletableFuture[]::new);
 
@@ -35,7 +37,7 @@ public class ServerStatusServiceImpl extends AbstractServerStatusService {
                         try {
                             future.get().writeData(output);
                         } catch (InterruptedException | ExecutionException e) {
-                            ServerStatusBungee.INSTANCE.getLogger().log(Level.SEVERE, "Error getting server status", e);
+                            throw new IllegalStateException("Error getting server status", e);
                         }
                     }
                     con.accept(output.toByteArray());

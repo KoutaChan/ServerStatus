@@ -1,6 +1,7 @@
 package me.koutachan.serverstatus;
 
 import me.koutachan.serverstatus.cache.ServerStatusInfo;
+import me.koutachan.serverstatus.cache.proxy.ProxyAdapter;
 import me.koutachan.serverstatus.channel.MessageListener;
 import me.koutachan.serverstatus.citizens.ServerStatusTrait;
 import me.koutachan.serverstatus.commands.ServerStatusCommand;
@@ -22,7 +23,6 @@ import java.util.function.Consumer;
 
 public final class ServerStatusSpigot extends JavaPlugin {
     public static ServerStatusSpigot INSTANCE;
-    public final static String CHANNEL_NAME = "serverstatus:forward";
     @Nullable
     public List<ServerStatusInfo> lastStatus;
 
@@ -39,8 +39,8 @@ public final class ServerStatusSpigot extends JavaPlugin {
     public void onEnable() {
         // Plugin startup logic
         saveDefaultConfig();
-        getServer().getMessenger().registerOutgoingPluginChannel(this, CHANNEL_NAME);
-        getServer().getMessenger().registerIncomingPluginChannel(this, CHANNEL_NAME, new MessageListener());
+        getServer().getMessenger().registerOutgoingPluginChannel(this, ProxyAdapter.DEFAULT_CHANNEL);
+        getServer().getMessenger().registerIncomingPluginChannel(this, ProxyAdapter.DEFAULT_CHANNEL, new MessageListener());
         getServer().getPluginManager().registerEvents(new EventListener(), this);
 
         ServerStatusCommand statusCommand = new ServerStatusCommand();
