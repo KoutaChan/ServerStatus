@@ -96,7 +96,6 @@ public class ServerStatusVelocity {
             return;
         }
         event.setResult(PluginMessageEvent.ForwardResult.handled());
-
         if (!(event.getSource() instanceof ServerConnection connection)) {
             return;
         }

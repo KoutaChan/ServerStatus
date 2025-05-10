@@ -1,6 +1,7 @@
 package me.koutachan.serverstatus.adapter;
 
 import com.velocitypowered.api.proxy.ProxyServer;
+import com.velocitypowered.api.proxy.server.PingOptions;
 import com.velocitypowered.api.proxy.server.RegisteredServer;
 import com.velocitypowered.api.proxy.server.ServerPing;
 import me.koutachan.serverstatus.ServerStatusVelocity;
@@ -11,9 +12,13 @@ import java.time.Duration;
 import java.util.Collection;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.TimeUnit;
 
 public class VelocityAdapter implements ProxyAdapter<RegisteredServer> {
     private final ProxyServer proxy;
+    private final static PingOptions PING_OPTIONS = PingOptions.builder()
+            .timeout(10, TimeUnit.SECONDS)
+            .build();
 
     public VelocityAdapter(ProxyServer proxy) {
         this.proxy = proxy;
@@ -33,7 +38,7 @@ public class VelocityAdapter implements ProxyAdapter<RegisteredServer> {
 
     @Override
     public CompletableFuture<ServerStatusInfo> ping(RegisteredServer server) {
-        return server.ping()
+        return server.ping(PING_OPTIONS)
                 .thenApply(action -> {
                     Optional<ServerPing.Players> players = action.getPlayers();
                     return new ServerStatusInfo(
