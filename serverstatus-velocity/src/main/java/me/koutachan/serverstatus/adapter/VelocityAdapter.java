@@ -47,6 +47,9 @@ public class VelocityAdapter implements ProxyAdapter<RegisteredServer> {
                             players.map(ServerPing.Players::getOnline).orElse(0),
                             players.map(ServerPing.Players::getMax).orElse(0)
                     );
+                })
+                .exceptionally(ex -> {
+                    return new ServerStatusInfo(server.getServerInfo().getName(), false, 0, 0);
                 });
     }
 
