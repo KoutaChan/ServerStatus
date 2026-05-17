@@ -2,16 +2,19 @@ package me.koutachan.serverstatus.citizens;
 
 import me.koutachan.serverstatus.ServerStatusSpigot;
 import me.koutachan.serverstatus.ServerStatusInfo;
+import net.citizensnpcs.api.npc.NPC;
 import net.citizensnpcs.api.trait.Trait;
 import net.citizensnpcs.api.trait.TraitName;
 import net.citizensnpcs.api.util.DataKey;
+import net.citizensnpcs.trait.ArmorStandTrait;
 import net.citizensnpcs.trait.HologramTrait;
 import org.bukkit.ChatColor;
+import org.bukkit.Location;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
+import org.bukkit.entity.EntityType;
+import org.bukkit.event.player.PlayerTeleportEvent;
 
-import java.lang.reflect.Field;
-import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Function;
@@ -19,7 +22,9 @@ import java.util.function.Function;
 @TraitName("server-status")
 public class ServerStatusTrait extends Trait {
     private String serverId;
-    private List<HologramTrait.ArmorstandRenderer> renderers = new ArrayList<>();
+    private NPC displayNpc;
+    private int displayedLineCount;
+    private double lineHeight = Double.NaN;
     private boolean active;
 
     public ServerStatusTrait() {
@@ -64,6 +69,7 @@ public class ServerStatusTrait extends Trait {
 
     @SuppressWarnings("unchecked")
     private void refreshHologram(Object content, Function<String, String> formatter) {
+        List<String> lines = new ArrayList<>();
         String[] texts;
         if (content instanceof List) {
             texts = ((List<String>) content).toArray(new String[0]);
@@ -71,90 +77,67 @@ public class ServerStatusTrait extends Trait {
             texts = content.toString().split("\n");
         }
 
-        List<HologramTrait.ArmorstandRenderer> newRenderers = new ArrayList<>();
-
-        HologramTrait trait = npc.getTraitNullable(HologramTrait.class);
-
-        try {
-            Field linesField = HologramTrait.class.getDeclaredField("lines");
-            linesField.setAccessible(true);
-            List<Object> hologramLines = (List<Object>) linesField.get(trait);
-
-            for (int i = texts.length - 1; i >= 0; i--) {
-                String formattedText = formatter.apply(ChatColor.translateAlternateColorCodes('&', texts[i]));
-                HologramTrait.ArmorstandRenderer renderer;
-
-                if (i < renderers.size()) {
-                    renderer = renderers.get(i);
-
-                    hologramLines.stream()
-                            .filter(line -> getRendererFromLine(line) == renderer)
-                            .findFirst()
-                            .ifPresent(line -> setLineText(line, formattedText));
-
-                    renderer.updateText(npc, formattedText);
-                } else {
-                    renderer = new HologramTrait.ArmorstandRenderer();
-                    trait.addTemporaryLine(formattedText, -1, renderer);
-                }
-
-                newRenderers.add(0, renderer);
-            }
-
-            // 未使用のレンダラーを削除
-            List<HologramTrait.ArmorstandRenderer> renderersToRemove = new ArrayList<>(renderers);
-            renderersToRemove.removeAll(newRenderers);
-
-            if (!renderersToRemove.isEmpty()) {
-                // 未使用レンダラーとそれに関連するホログラムラインを削除
-                for (HologramTrait.ArmorstandRenderer oldRenderer : renderersToRemove) {
-                    oldRenderer.destroy();
-                    hologramLines.removeIf(line -> getRendererFromLine(line) == oldRenderer);
-                }
-
-                // ホログラムを再読み込み
-                Method reloadMethod = HologramTrait.class.getDeclaredMethod("reloadLineHolograms");
-                reloadMethod.setAccessible(true);
-                reloadMethod.invoke(trait);
-            }
-
-            this.renderers = newRenderers;
-        } catch (Exception ex) {
-            throw new RuntimeException("ホログラム更新中にエラーが発生", ex);
+        for (int i = texts.length - 1; i >= 0; i--) {
+            lines.add(formatter.apply(ChatColor.translateAlternateColorCodes('&', texts[i])));
         }
+
+        refreshHologram(lines);
     }
 
-    private Object getRendererFromLine(Object line) {
-        try {
-            Field rendererField = line.getClass().getDeclaredField("renderer");
-            rendererField.setAccessible(true);
-            return rendererField.get(line);
-        } catch (Exception e) {
-            throw new RuntimeException("レンダラー取得中にエラーが発生", e);
+    private void refreshHologram(List<String> lines) {
+        HologramTrait trait = getDisplayHologramTrait();
+        if (trait == null) return;
+
+        for (int i = 0; i < lines.size(); i++) {
+            trait.setLine(i, lines.get(i));
         }
+
+        for (int i = displayedLineCount - 1; i >= lines.size(); i--) {
+            trait.removeLine(i);
+        }
+
+        displayedLineCount = lines.size();
     }
 
-    private void setLineText(Object line, String text) {
-        try {
-            Method setTextMethod = line.getClass().getDeclaredMethod("setText", String.class);
-            setTextMethod.setAccessible(true);
-            setTextMethod.invoke(line, text);
-        } catch (Exception e) {
-            throw new RuntimeException("テキスト設定中にエラーが発生", e);
+    private HologramTrait getDisplayHologramTrait() {
+        if (!npc.isSpawned()) return null;
+
+        Location location = getDisplayLocation();
+        if (displayNpc == null) {
+            displayNpc = ServerStatusSpigot.INSTANCE.getStatusDisplayRegistry()
+                    .createNPC(EntityType.ARMOR_STAND, "serverstatus-display");
+            displayNpc.data().set(NPC.Metadata.SHOULD_SAVE, false);
+            displayNpc.setProtected(true);
+
+            ArmorStandTrait armorStandTrait = displayNpc.getOrAddTrait(ArmorStandTrait.class);
+            armorStandTrait.setAsHelperEntity(npc);
+            displayNpc.getOrAddTrait(HologramTrait.class);
         }
+
+        if (displayNpc.isSpawned()) {
+            displayNpc.teleport(location, PlayerTeleportEvent.TeleportCause.PLUGIN);
+        } else if (!displayNpc.spawn(location)) {
+            return null;
+        }
+
+        HologramTrait trait = displayNpc.getOrAddTrait(HologramTrait.class);
+        double configuredLineHeight = ServerStatusSpigot.INSTANCE.getConfig().getDouble("display-height", 0.3);
+        if (Double.compare(lineHeight, configuredLineHeight) != 0) {
+            trait.setLineHeight(configuredLineHeight);
+            lineHeight = configuredLineHeight;
+        }
+        return trait;
+    }
+
+    private Location getDisplayLocation() {
+        Location location = npc.getEntity().getLocation().clone();
+        location.add(0, npc.getEntity().getHeight(), 0);
+        return location;
     }
 
     @Override
     public void onSpawn() {
         active = true;
-        HologramTrait trait = npc.getOrAddTrait(HologramTrait.class);
-        try {
-            Field heightField = HologramTrait.class.getDeclaredField("lineHeight");
-            heightField.setAccessible(true);
-            heightField.set(trait, ServerStatusSpigot.INSTANCE.getConfig().getDouble("display-height", 0.3));
-        } catch (Exception ex) {
-            throw new RuntimeException("ホログラム高さ設定中にエラーが発生", ex);
-        }
     }
 
     @Override
@@ -168,31 +151,13 @@ public class ServerStatusTrait extends Trait {
         clearHolograms();
     }
 
-    @SuppressWarnings("unchecked")
     private void clearHolograms() {
-        if (renderers.isEmpty()) return;
-
-        HologramTrait trait = npc.getTraitNullable(HologramTrait.class);
-        if (trait == null) return;
-
-        try {
-            Field linesField = HologramTrait.class.getDeclaredField("lines");
-            linesField.setAccessible(true);
-            List<Object> hologramLines = (List<Object>) linesField.get(trait);
-
-            for (HologramTrait.ArmorstandRenderer renderer : renderers) {
-                renderer.destroy();
-                hologramLines.removeIf(line -> getRendererFromLine(line) == renderer);
-            }
-
-            Method reloadMethod = HologramTrait.class.getDeclaredMethod("reloadLineHolograms");
-            reloadMethod.setAccessible(true);
-            reloadMethod.invoke(trait);
-
-            renderers.clear();
-        } catch (Exception ex) {
-            throw new RuntimeException("ホログラム削除中にエラーが発生", ex);
+        if (displayNpc != null) {
+            displayNpc.destroy();
+            displayNpc = null;
         }
+        displayedLineCount = 0;
+        lineHeight = Double.NaN;
     }
 
     @Override

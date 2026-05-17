@@ -8,12 +8,14 @@ import me.koutachan.serverstatus.event.EventListener;
 import me.koutachan.serverstatus.task.StatusUpdateTask;
 import net.citizensnpcs.api.CitizensAPI;
 import net.citizensnpcs.api.npc.NPC;
+import net.citizensnpcs.api.npc.NPCRegistry;
 import net.citizensnpcs.api.trait.TraitInfo;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import javax.annotation.Nullable;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -28,6 +30,8 @@ public final class ServerStatusSpigot extends JavaPlugin {
     public Map<UUID, Consumer<NPC>> queue = new HashMap<>();
 
     public StatusUpdateTask task;
+
+    private NPCRegistry statusDisplayRegistry;
 
     @Override
     public void onLoad() {
@@ -46,6 +50,7 @@ public final class ServerStatusSpigot extends JavaPlugin {
         getCommand("set-status").setExecutor(statusCommand);
         getCommand("set-status").setTabCompleter(statusCommand);
 
+        statusDisplayRegistry = CitizensAPI.createInMemoryNPCRegistry("serverstatus-displays");
         CitizensAPI.getTraitFactory().registerTrait(TraitInfo.create(ServerStatusTrait.class));
 
         startStatusTask();
@@ -101,8 +106,27 @@ public final class ServerStatusSpigot extends JavaPlugin {
                 .orElse(null);
     }
 
+    public NPCRegistry getStatusDisplayRegistry() {
+        return statusDisplayRegistry;
+    }
+
     @Override
     public void onDisable() {
-        // Plugin shutdown logic
+        if (task != null) {
+            task.cancel();
+            task = null;
+        }
+
+        if (statusDisplayRegistry != null) {
+            List<NPC> npcs = new ArrayList<>();
+            for (NPC npc : statusDisplayRegistry) {
+                npcs.add(npc);
+            }
+            for (NPC npc : npcs) {
+                npc.destroy();
+            }
+            statusDisplayRegistry.deregisterAll();
+            statusDisplayRegistry = null;
+        }
     }
 }
